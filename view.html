@@ -12,13 +12,19 @@
            integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous" />
    </head>
    
+   <style></style>
    <body>
-       <div class="container">
-           <div class="row">
-               <div class="col mt-5">
-                   <img src="" class="img-thumbnail" id="Poster" alt="..."/>
-               </div>
-               <div class="col mt-5">
+    <nav class="navbar bg-body-tertiary">
+        <div class="container-fluid" style="margin-bottom: 25px;">
+            <a class=" btn btn-outline-primary" href="index.html" role="button">Movie Lists</a>
+        </div>
+     <div class="container--fluid">
+            <div class="row">
+           
+               <div class="col-sm-4 col-md-3 " >
+                   <img src="" class="img-thumbnail" id="Poster" alt="..." />
+                 </div>
+                    <div class="col mt-5" style="justify-content: right;">
                    <div class="row">
                        <h4 id="title">Title</h4>
                    </div>
@@ -30,10 +36,15 @@
                    </div>
                    <div class="row">
                        <p style="font-style: italic" id="genre"></p>
+                    <div class="row">
+                        <p><a href="" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover btn btn-primary fw-bold text-body-emphasis" id="trailer" >Movie Trailer</a></p>
+                    
+                    </div>
+                       
                       
                    </div>
                </div>
-           </div>
+            </div>
        </div>
    
        <script>
@@ -50,6 +61,7 @@
                document.getElementById("title").innerHTML = movie.title;
                document.getElementById("releaseDate").innerHTML = movie.release_date;
                document.getElementById("description").innerHTML = movie.description;
+               document.getElementById("trailer").href = movie.trailer_url;
    
             
    
@@ -57,7 +69,7 @@
                const index = genres.map((genre) => genre._id).indexOf(movie.genre);
                const movie_genre = genres[index];
                document.getElementById("genre").innerText = movie_genre.title;
-               console.log (genre);
+               
            }
        </script>
    

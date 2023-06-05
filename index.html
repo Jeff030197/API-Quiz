@@ -25,6 +25,9 @@
         <div class="row">
             <div class="col">
                 <!-- Table to display movies -->
+                <div class="my-3">
+                    <input type="text" class="form-control border-0 border-bottom" id="searchInput" placeholder="Search">
+                </div>
                 <table class="table table-striped">
                     <thead>
                         <tr>
@@ -77,6 +80,12 @@
                         </div>
 
                         <div class="mb-3">
+                            <label for="trailer_url" class="form-label">Trailer Url</label>
+                            <input type="url" class="form-control" name="trailer_url" id="trailer_url" required>
+                        </div>
+
+
+                        <div class="mb-3">
                             <label for="description" class="form-label">Description</label>
                             <textarea name="description" id="description" cols="30" rows="10" class="form-control"
                                 required></textarea>
@@ -116,10 +125,19 @@
                             <label for="updateMovieTitle" class="form-label">Title</label>
                             <input type="text" class="form-control" name="updateMovieTitle" id="updateMovieTitle" required>
                         </div>
+
                         <div class="mb-3">
                             <label for="updateMoviePosterUrl" class="form-label">Poster Url</label>
                             <input type="url" class="form-control" name="updateMoviePosterUrl" id="updateMoviePosterUrl" required>
                         </div>
+
+                        <div class="mb-3">
+                            <label for="updateMovieTrailerUrl" class="form-label">Trailer Url</label>
+                            <input type="url" class="form-control" name="updateMovieTrailerUrl" id="updateMovieTrailerUrl" required>
+                        </div>
+
+
+                       
 
                         <div class="mb-3">
                             <label for="updateMovieDescription" class="form-label">Description</label>
@@ -173,10 +191,12 @@
         integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz"
         crossorigin="anonymous"></script>
 
+    <script src="https://cdn.jsdelivr.net/npm/fuse.js/dist/fuse.js"></script>
+
     <!-- JavaScript code -->
     <script>
         // API URL for CRUD operations
-        const url = 'https://crudcrud.com/api/49411b5dfd964e049676155c76bcc8fc'
+        const url = 'https://crudcrud.com/api/55bbca459a6e403fa5ce75ed9239afca'
 
         // Function to get genres from API or localStorage
         const getGenres = async () => {
@@ -244,12 +264,47 @@
                 // Fetch movies from API and store in localStorage
                 await fetch(`${url}/movies`)
                     .then(response => response.json())
-                    .then(movies => localStorage.setItem("movies", JSON.stringify(movies)))
+                    .then(movies => {
+                        const list = movies.map((movie) => {
+                            movie.genreTitle = getGenreTitle(movie.genre)
+                            return movie
+                        })
+                        localStorage.setItem("movies", JSON.stringify(list))
+                    })
                     .catch(error => console.log(error))
             }
 
             const movies = JSON.parse(localStorage.getItem("movies"))
+            generateTableMovies(movies)
 
+            const searchInput = document.getElementById("searchInput")
+            searchInput.addEventListener("keyup", (event) => {
+                const searchTerm = event.target.value
+
+                if(searchTerm.length >= 3) {
+                    const options = {
+                        includeScore: true,
+                        keys: ['title', 'description', 'genreTitle']
+                    }
+
+                    const fuse = new Fuse(movies, options)
+
+                    const result = fuse.search(searchTerm)
+                    const searchResult = result.map(row => row.item)
+                    console.log(result)
+                    generateTableMovies(searchResult)
+                } else {
+                    generateTableMovies(movies)
+                }
+            })
+
+
+            
+        }
+        // Call the function to get movies
+        getMovies()
+
+        function generateTableMovies(movies) {
             const movieTableBody = document.getElementById('movieTableBody')
             movieTableBody.innerHTML = ''
             let rows = ''
@@ -261,7 +316,7 @@
                             <td>
                                 <a href="view.html?id=${movies[i]._id}">${movies[i].title}</a>    
                             </td>
-                            <td>${getGenreTitle(movies[i].genre)}</td>
+                            <td>${movies[i].genreTitle}</td>
                             <td>${movies[i].release_date}</td>
                             <td>
                                 <div class="d-grid gap-2 d-md-flex justify-content-md-end">
@@ -276,8 +331,6 @@
 
             movieTableBody.innerHTML = rows
         }
-        // Call the function to get movies
-        getMovies()
 
         // Function to open the new movie modal
         const openNewMovieModal = () => {
@@ -295,6 +348,7 @@
             const description = document.getElementById('description').value
             const release_date = document.getElementById('release_date').value
             const poster_url = document.getElementById('poster_url').value
+            const trailer_url = document.getElementById('trailer_url').value
 
             // Send a POST request to create a new movie
             fetch(`${url}/movies`, {
@@ -307,7 +361,8 @@
                     title,
                     description,
                     release_date,
-                    poster_url
+                    poster_url,
+                    trailer_url
                 })
             })
                 .then(response => response.json())
@@ -324,6 +379,7 @@
                     document.getElementById('description').value = ''
                     document.getElementById('release_date').value = ''
                     document.getElementById('poster_url').value = ''
+                    document.getElementById('trailer_url').value = ''
                 })
                 .catch(error => {
                     console.log(error)
@@ -372,7 +428,8 @@
                 document.getElementById('updateMovieDescription').value = selectedMovie.description
                 document.getElementById('updateMovieReleaseDate').value = selectedMovie.release_date
                 document.getElementById('updateMoviePosterUrl').value = selectedMovie.poster_url
-                
+                document.getElementById('updateMovieTrailerUrl').value = selectedMovie.trailer_url
+                              
                 const updateMovieModal = bootstrap.Modal.getOrCreateInstance("#updateMovieModal")
                 updateMovieModal.show()
             })
@@ -389,6 +446,7 @@
             const description = document.getElementById('updateMovieDescription').value
             const release_date = document.getElementById('updateMovieReleaseDate').value
             const poster_url = document.getElementById('updateMoviePosterUrl').value
+            const trailer_url = document.getElementById('updateMovieTrailerUrl').value
 
             // Send a POST request to create a new movie
             fetch(`${url}/movies/${id}`, {
@@ -401,7 +459,8 @@
                     title,
                     description,
                     release_date,
-                    poster_url
+                    poster_url,
+                    trailer_url
 
                 })
             })
@@ -420,6 +479,7 @@
                     document.getElementById('updateMovieDescription').value = ''
                     document.getElementById('updateMovieReleaseDate').value = ''
                     document.getElementById('updateMoviePosterUrl').value = ''
+                    document.getElementById('updateMovieTrailerUrl').value = ''
                 })
                 .catch(error => {
                     console.log(error)
@@ -466,7 +526,7 @@
                 })
                 .catch(error => {
                     console.log(error)
-                })
+                })              
         })
     </script>
 </body>
